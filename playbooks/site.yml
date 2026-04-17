@@ -1,0 +1,13 @@
+- name: Launch EC2
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - ec2
+
+- name: Configure DNS server
+  hosts: dns
+  become: yes
+  gather_facts: yes
+  roles:
+    - dns
