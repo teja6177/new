@@ -101,5 +101,5 @@
 
         - name: Log completion
           debug:
-            msg: "Playbook finished (success or failure)"
+            msg: "EC2 Playbook finished (success or failure)"
 
