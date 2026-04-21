@@ -1,0 +1,14 @@
+$TTL 86400
+@   IN  SOA ns1.{{ domain_name }}. admin.{{ domain_name }}. (
+        {{ ansible_date_time.epoch }} ; serial
+        3600
+        1800
+        604800
+        86400 )
+
+@       IN  NS      ns1.{{ domain_name }}.
+ns1     IN  A       {{ ansible_host }}
+
+www     IN  A       {{ ansible_host }}
+app     IN  A       {{ ansible_host }}
+mail    IN  A       {{ ansible_host }}
