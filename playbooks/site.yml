@@ -22,7 +22,7 @@
 
 
 - name: Configure DNS server
-  hosts: dns
+  hosts: dns-serever
   become: yes
   gather_facts: yes
 
