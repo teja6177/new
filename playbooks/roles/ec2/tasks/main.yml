@@ -28,19 +28,31 @@
     vpc_subnet_id: "{{ subnet_id }}"
     region: "{{ region }}"
     wait: yes
-    security_groups: "{{ sg.group_id }}"
+    security_groups:
+      - "{{ sg.group_id }}"
     network:
       assign_public_ip: true
   register: ec2
-
-- name: Debug EC2 output
-  debug:
-    var: ec2
 
 - name: Save instance facts
   set_fact:
     instance_id: "{{ ec2.instance_ids[0] }}"
     public_ip: "{{ ec2.instances[0].public_ip_address }}"
+
+- name: Debug EC2 output
+  debug:
+    var: ec2
+
+- name: Wait for SSH to come up
+  wait_for:
+    host: "{{ public_ip }}"
+    port: 22
+    delay: 10
+    timeout: 300
+
+- name: Wait for SSH connection
+  wait_for_connection:
+    timeout: 300
 
 - name: Add host to inventory
   add_host:
@@ -50,18 +62,10 @@
     ansible_user: ec2-user
     ansible_ssh_private_key_file: "{{ private_key_path }}"
 
-- name: Wait for SSH to come up
-  wait_for:
-    host: "{{ ec2_output.instances[0].public_ip_address }}"
-    port: 22
-    delay: 10
-    timeout: 300
-    state: started
-
 - name: Show instance info
   debug:
     msg: |
       EC2 instance launched successfully!
-      Public IP: {{ ec2_output.instances[0].public_ip_address }}
-      Private IP: {{ ec2_output.instances[0].private_ip_address }}
-      Instance ID: {{ ec2_output.instances[0].instance_id }}   
+      Public IP: {{ public_ip }}
+      Private IP: {{ ec2.instances[0].private_ip_address }}
+      Instance ID: {{ instance_id }}
