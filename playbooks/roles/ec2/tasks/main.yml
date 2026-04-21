@@ -1,0 +1,104 @@
+- name: Deploy DNS Server (Provisioning)
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    instance_name: dns-server
+
+  tasks:
+
+    - name: Create security group
+      amazon.aws.ec2_group:
+        name: dns-sg
+        description: DNS SG
+        vpc_id: "{{ vpc_id }}"
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            ports: 22
+            cidr_ip: "{{ allowed_ssh_ip }}"
+          - proto: tcp
+            ports: 53
+            cidr_ip: 0.0.0.0/0
+          - proto: udp
+            ports: 53
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+        tags:
+          Name: dns-sg
+          Environment: dev
+      register: sg
+
+    - name: Execute deployment safely
+      block:
+
+        - name: Launch EC2 instance
+          amazon.aws.ec2_instance:
+            name: "{{ instance_name }}"
+            instance_type: "{{ instance_type }}"
+            image_id: "{{ ami_id }}"
+            key_name: "{{ key_name }}"
+            vpc_subnet_id: "{{ subnet_id }}"
+            region: "{{ region }}"
+            wait: yes
+            security_group: "{{ sg.group_id }}"
+            network:
+              assign_public_ip: true
+            tags:
+              Name: "{{ instance_name }}"
+              Environment: dev
+          register: ec2_output
+
+        # 🔥 Save immediately (important for rescue)
+        - name: Save instance details
+          set_fact:
+            instance_id: "{{ ec2_output.instances[0].instance_id }}"
+            public_ip: "{{ ec2_output.instances[0].public_ip_address }}"
+
+        - name: Add EC2 to dynamic inventory
+          add_host:
+            name: dns_server
+            groups: dns
+            ansible_host: "{{ public_ip }}"
+            ansible_user: ec2-user
+            ansible_ssh_private_key_file: "{{ private_key_path }}"
+
+        - name: Wait for SSH to come up
+          wait_for:
+            host: "{{ public_ip }}"
+            port: 22
+            delay: 15
+            timeout: 300
+
+        - name: Verify SSH connectivity
+          wait_for_connection:
+            timeout: 300
+
+        - name: Show instance info
+          debug:
+            msg: |
+              ✅ EC2 instance launched
+              Public IP: {{ public_ip }}
+              Instance ID: {{ instance_id }}
+
+      rescue:
+
+        - name: Terminate EC2 instance if failure occurs
+          amazon.aws.ec2_instance:
+            instance_ids:
+              - "{{ instance_id }}"
+            state: absent
+            region: "{{ region }}"
+          when: instance_id is defined
+
+        - name: Fail play explicitly
+          fail:
+            msg: "❌ Deployment failed → EC2 terminated"
+
+      always:
+
+        - name: Log completion
+          debug:
+            msg: "EC2 Playbook finished (success or failure)"
