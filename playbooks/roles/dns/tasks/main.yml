@@ -1,4 +1,4 @@
-- name: Install bind
+- name: Install Bind
   yum:
     name: bind
     state: present
@@ -11,16 +11,24 @@
     group: root
     mode: '0644'
 
-- name: Create zone file
+- name: Ensure /var/named directory exists
+  file:
+    path: /var/named
+    state: directory
+    owner: named
+    group: named
+    mode: '0755'
+
+- name: Deploy zone file
   template:
-    src: zone.j2
+    src: kbvsm.com.zone.j2
     dest: "/var/named/{{ domain_name }}.zone"
-    owner: root
-    group: root
+    owner: named
+    group: named
     mode: '0644'
 
-- name: Start named service
+- name: Restart named service
   service:
     name: named
-    state: started
+    state: restarted
     enabled: yes
