@@ -103,17 +103,3 @@
           debug:
             msg: "Playbook finished (success or failure)"
 
-# =====================================================
-
-- name: Configure DNS Server
-  hosts: dns
-  become: yes
-
-  tasks:
-
-    - name: Wait for connection again (extra safety)
-      wait_for_connection:
-        timeout: 120
-
-  roles:
-    - dns
