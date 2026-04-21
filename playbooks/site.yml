@@ -20,7 +20,6 @@
         - fail:
             msg: "Stopping playbook due to failure"
 
----
 
 - name: Configure DNS server
   hosts: dns
