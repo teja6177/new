@@ -28,7 +28,7 @@
     vpc_subnet_id: "{{ subnet_id }}"
     region: "{{ region }}"
     wait: yes
-    security_group:
+    security_groups:
       - "{{ sg.group_id }}"
     network:
       assign_public_ip: true
