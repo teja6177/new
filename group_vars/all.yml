@@ -4,5 +4,6 @@ instance_type: t2.micro
 ami_id: ami-0f58b397bc5c1f2e8
 vpc_id: vpc-0db825702939b11a0
 subnet_id: subnet-06dba24b763624c5e
+instance_name: dns-server
 
 domain_name: kbvsm.com
