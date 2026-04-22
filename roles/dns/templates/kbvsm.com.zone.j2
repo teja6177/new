@@ -1,0 +1,11 @@
+$TTL 86400
+@   IN  SOA ns1.{{ domain_name }}. admin.{{ domain_name }}. (
+        2024010101
+        3600
+        1800
+        604800
+        86400 )
+
+@       IN  NS      ns1.{{ domain_name }}
+ns1     IN  A       {{ ansible_host }}
+@       IN  A       {{ ansible_host }}
