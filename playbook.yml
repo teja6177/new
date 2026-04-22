@@ -19,7 +19,7 @@
 
 
 - name: Configure DNS server
-  hosts: tag_Role_dns
+  hosts: tag_dns
   become: yes
   gather_facts: yes
 
