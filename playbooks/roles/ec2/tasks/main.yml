@@ -59,6 +59,8 @@
     ansible_ssh_private_key_file: "{{ private_key_path }}"
   when: ec2.instances is defined
 
+- meta: refresh_inventory 
+
 - name: Show inventory
   debug:
     var: groups['dns-server']  
