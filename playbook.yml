@@ -9,7 +9,7 @@
 
 # 🔴 Ensure instance is reachable before config
 - name: Wait for EC2 SSH
-  hosts: tag_Role_dns
+  hosts: tag_dns
   gather_facts: no
 
   tasks:
