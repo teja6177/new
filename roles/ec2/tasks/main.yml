@@ -1,0 +1,52 @@
+- name: Create security group
+  amazon.aws.ec2_security_group:
+    name: dns-sg
+    description: DNS Security Group
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    rules:
+      - proto: tcp
+        ports: 22
+        cidr_ip: "{{ allowed_ssh_ip }}"
+      - proto: tcp
+        ports: 53
+        cidr_ip: 0.0.0.0/0
+      - proto: udp
+        ports: 53
+        cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0
+  register: sg
+
+
+- name: Launch EC2 instance
+  amazon.aws.ec2_instance:
+    name: "{{ instance_name }}"
+    instance_type: "{{ instance_type }}"
+    image_id: "{{ ami_id }}"
+    key_name: "{{ key_name }}"
+    vpc_subnet_id: "{{ subnet_id }}"
+    region: "{{ region }}"
+    wait: yes
+    security_group: "{{ sg.group_id }}"
+    network:
+      assign_public_ip: true
+    tags:
+      Name: "{{ instance_name }}"
+      Role: dns
+  register: ec2
+
+
+- name: Show instance info
+  debug:
+    msg: |
+      EC2 instance launched!
+      Public IP: {{ ec2.instances[0].public_ip_address }}
+      Private IP: {{ ec2.instances[0].private_ip_address }}
+
+
+# 🔴 Give AWS time to update inventory
+- name: Wait for AWS inventory sync
+  pause:
+    seconds: 20
