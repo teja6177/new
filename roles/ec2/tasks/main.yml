@@ -4,14 +4,15 @@
     description: DNS Security Group
     vpc_id: "{{ vpc_id }}"
     region: "{{ region }}"
+    state: present
     rules:
       - proto: tcp
         ports: 22
-        cidr_ip: "{{ allowed_ssh_ip }}"
-      - proto: tcp
-        ports: 53
         cidr_ip: 0.0.0.0/0
       - proto: udp
+        ports: 53
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
         ports: 53
         cidr_ip: 0.0.0.0/0
     rules_egress:
@@ -28,15 +29,23 @@
     key_name: "{{ key_name }}"
     subnet_id: "{{ subnet_id }}"
     region: "{{ region }}"
+
     security_group_ids:
       - "{{ sg.group_id }}"
+
     network:
       assign_public_ip: true
+
+    exact_count: 1
+    count_tag:
+      Name: "{{ instance_name }}"
+
     tags:
       Name: "{{ instance_name }}"
       Role: dns
       Environment: dev
-    wait: yes  
+
+    wait: yes
   register: ec2
 
 
@@ -44,5 +53,5 @@
   debug:
     msg: |
       EC2 instance launched!
-      Public IP: {{ ec2.instances[0].public_ip_address }}
-      Private IP: {{ ec2.instances[0].private_ip_address }}
+      Public IP: {{ ec2.instances[0].public_ip_address | default('N/A') }}
+      Private IP: {{ ec2.instances[0].private_ip_address | default('N/A') }}
