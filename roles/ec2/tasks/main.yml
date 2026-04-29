@@ -46,9 +46,3 @@
       EC2 instance launched!
       Public IP: {{ ec2.instances[0].public_ip_address }}
       Private IP: {{ ec2.instances[0].private_ip_address }}
-
-
-# 🔴 Give AWS time to update inventory
-- name: Wait for AWS inventory sync
-  pause:
-    seconds: 20
