@@ -28,8 +28,8 @@
     key_name: "{{ key_name }}"
     vpc_subnet_id: "{{ subnet_id }}"
     region: "{{ region }}"
-    wait: yes
-    security_group: "{{ sg.group_id }}"
+    security_group_ids:
+      - "{{ sg.group_id }}"
     network:
       assign_public_ip: true
     tags:
