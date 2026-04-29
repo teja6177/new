@@ -18,7 +18,7 @@
     owner: root
     group: root
     mode: '0644'
-  register: named_conf_result
+  notify: restart named
 
 - name: Deploy zone file
   template:
@@ -27,24 +27,15 @@
     owner: named
     group: named
     mode: '0644'
-  register: zone_result
+  notify: restart named
 
-# Validate only if something changed
 - name: Validate named.conf
   command: named-checkconf
-  when: named_conf_result.changed
   changed_when: false
 
 - name: Validate zone file
   command: "named-checkzone {{ domain_name }} /var/named/{{ domain_name }}.zone"
-  when: zone_result.changed
   changed_when: false
-
-- name: Restart named if needed
-  service:
-    name: named
-    state: restarted
-  when: named_conf_result.changed or zone_result.changed
 
 - name: Ensure named is running
   service:
