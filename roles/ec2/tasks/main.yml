@@ -36,6 +36,7 @@
       Name: "{{ instance_name }}"
       Role: dns
       Environment: dev
+    wait: yes  
   register: ec2
 
 
