@@ -4,7 +4,7 @@ regions:
   - ap-south-1
 
 filters:
-  tag:Role: dns
+  instance-state-name: running
 
 keyed_groups:
   - key: tags.Role
