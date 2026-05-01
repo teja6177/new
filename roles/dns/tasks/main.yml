@@ -12,8 +12,8 @@
     mode: '0755'
 
 - name: Deploy named.conf
-  copy:
-    src: named.conf
+  template:
+    src: named.conf.j2
     dest: /etc/named.conf
     owner: root
     group: root
