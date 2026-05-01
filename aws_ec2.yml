@@ -8,7 +8,7 @@ filters:
   tag:Environment: dev   
 
 keyed_groups:
-  - key: tags.Role
+  - key: tags:Role
     prefix: tag
 
 hostnames:
