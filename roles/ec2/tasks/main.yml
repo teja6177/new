@@ -38,7 +38,7 @@
 
     exact_count: 1
     
-    ec2_tags:
+    tags:
       Name: "{{ instance_name }}"
       Role: dns
       Environment: dev
