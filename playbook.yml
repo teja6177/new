@@ -9,7 +9,7 @@
         name: ec2
 
 
-- name: Refresh inventory after provisioning
+- name: Refresh dynamic inventory
   hosts: localhost
   gather_facts: no
 
@@ -34,14 +34,13 @@
   tasks:
     - block:
 
-        - name: Run DNS role
+        - name: Run DNS configuration role
           include_role:
             name: dns
 
       rescue:
 
         - name: Terminate EC2 instance on failure
-          delegate_to: localhost
           include_role:
             name: ec2_terminate
 
@@ -51,6 +50,6 @@
 
       always:
 
-        - name: Log completion
+        - name: Log execution status
           debug:
-            msg: "DNS play finished (success or failure handled)"
+            msg: "DNS play completed (success or failure handled)"
