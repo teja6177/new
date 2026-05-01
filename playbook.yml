@@ -2,24 +2,55 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  roles:
-    - ec2
 
-- name: Refresh inventory
+  tasks:
+    - name: Create EC2 instance
+      include_role:
+        name: ec2
+
+
+- name: Refresh inventory after provisioning
   hosts: localhost
+  gather_facts: no
+
   tasks:
     - meta: refresh_inventory
 
-- name: Wait for EC2 SSH
+
+- name: Wait for EC2 SSH to be ready
   hosts: tag_dns
   gather_facts: no
+
   tasks:
-    - wait_for_connection:
-        delay: 10
+    - name: Wait for SSH connection
+      wait_for_connection:
         timeout: 300
+
 
 - name: Configure DNS server
   hosts: tag_dns
   become: yes
-  roles:
-    - dns
+
+  tasks:
+    - block:
+
+        - name: Run DNS role
+          include_role:
+            name: dns
+
+      rescue:
+
+        - name: Terminate EC2 instance on failure
+          delegate_to: localhost
+          include_role:
+            name: ec2_terminate
+
+        - name: Fail play after cleanup
+          fail:
+            msg: "DNS configuration failed — EC2 instance terminated."
+
+      always:
+
+        - name: Log completion
+          debug:
+            msg: "DNS play finished (success or failure handled)"
