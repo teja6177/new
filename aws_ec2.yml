@@ -5,7 +5,7 @@ regions:
 
 filters:
   instance-state-name: running
-  tag:Environment: dev   
+  "tag:Environment": dev   
 
 keyed_groups:
   - key: tags.Role
