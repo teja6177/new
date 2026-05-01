@@ -1,39 +1,28 @@
-- name: AWS EC2 Provision + DNS Setup
+- name: Provision EC2 instance
   hosts: localhost
   connection: local
   gather_facts: no
+  roles:
+    - ec2
 
+- name: Refresh inventory
+  hosts: localhost
+  gather_facts: no
   tasks:
-
-    - name: Create EC2
-      include_role:
-        name: ec2
-
-    - name: Wait for AWS propagation
-      pause:
-        seconds: 20
-
-    - name: Refresh inventory
+    - name: Refresh dynamic inventory
       meta: refresh_inventory
 
-    - name: Wait for SSH
-      wait_for:
-        host: "{{ ec2.instances[0].public_ip_address }}"
-        port: 22
+- name: Wait for EC2 SSH
+  hosts: tag_dns
+  gather_facts: no
+  tasks:
+    - name: Wait for SSH to become available
+      wait_for_connection:
+        delay: 10
         timeout: 300
 
-    - name: Run DNS setup (with safety)
-      block:
-
-        - name: Configure DNS
-          delegate_to: "{{ ec2.instances[0].public_ip_address }}"
-          include_role:
-            name: dns
-
-      rescue:
-
-        - include_role:
-            name: ec2_terminate
-
-        - fail:
-            msg: "DNS failed, instance terminated"
+- name: Configure DNS server
+  hosts: tag_dns
+  become: yes
+  roles:
+    - dns
